@@ -1,0 +1,1021 @@
+╔══════════════════════════════════════════════════════════════╗
+║          🧠 SYSTEM DESIGN — DAY 1 + DAY 2                  ║
+║              30-DAY REVISION NOTES                         ║
+╚══════════════════════════════════════════════════════════════╝
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🟢 1. STARTING POINT — SIMPLE SYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Client
+  ↓
+Server
+  ↓
+Database
+
+Works while traffic is manageable.
+
+As users increase:
+Users
+  ↓
+More Requests
+  ↓
+More CPU / RAM / DB usage
+  ↓
+Bottleneck
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🟢 2. SCALING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Vertical Scaling
+→ Make ONE server stronger.
+
+Small Server
+    ↓
+Bigger Server
+    ↓
+Physical / Cost limit
+
+
+Horizontal Scaling
+→ Add MORE servers.
+
+        ┌── Server 1
+Client ─┼── Server 2
+        └── Server 3
+
+Why horizontal?
+→ One machine has a ceiling.
+→ Multiple machines provide more capacity + redundancy.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🟢 3. LOAD BALANCER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Problem:
+Multiple servers exist.
+
+Question:
+→ Who decides where each request goes?
+
+Solution:
+
+Client
+  ↓
+Load Balancer
+  ↓
+S1   S2   S3
+
+Load Balancer
+→ Routes traffic to backend servers.
+→ NOT application storage.
+→ NOT business logic.
+
+Algorithms:
+→ Round Robin
+→ Least Connections
+→ IP Hash
+
+Least Connections:
+→ Send request to server with fewer active connections.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🟢 4. HEALTH CHECKS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If:
+
+S1 ✅
+S2 ❌
+S3 ✅
+
+Load Balancer:
+→ Detects unhealthy server.
+→ Stops sending NEW requests to it.
+
+Recovered server:
+→ Health check first.
+→ Then return to traffic.
+
+
+Important:
+Existing request on crashed server
+→ may fail / timeout.
+
+Future requests
+→ go to healthy servers.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🟢 5. LOAD BALANCER FAILURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Single LB:
+
+Client
+  ↓
+LB ❌
+  ↓
+Servers
+
+→ LB becomes SPOF.
+
+Solution:
+→ Redundant / highly available Load Balancers.
+
+Core rule:
+→ Critical components should not become single points of failure.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🟢 6. STATEFUL vs STATELESS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Stateful:
+
+Request 1 → Server 1
+             ↓
+         User state stored here
+
+Request 2 → Server 2
+             ↓
+       State may be missing ❌
+
+Sticky Sessions
+→ Try to keep user on same server.
+→ But creates scaling/failure complexity.
+
+
+Stateless:
+
+Request 1 → S1
+Request 2 → S3
+Request 3 → S2
+
+Any server can handle request.
+
+→ Easier horizontal scaling.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🟢 7. DATABASE BECOMES THE NEXT BOTTLENECK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+After scaling servers:
+
+S1 ─┐
+S2 ─┼──→ Database
+S3 ─┘
+
+More servers
+→ More DB requests
+→ Database may become bottleneck.
+
+Possible limits:
+→ CPU
+→ RAM
+→ Connections
+→ Disk I/O
+→ Query processing
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🟢 8. CACHING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Repeated request
+      ↓
+Do we really need DB every time?
+
+Cache:
+
+Request
+  ↓
+Cache
+ ├── HIT  → Return
+ └── MISS
+       ↓
+     Database
+       ↓
+      Cache
+       ↓
+     Return
+
+Cache Hit
+→ Data found.
+
+Cache Miss
+→ Data not found → DB.
+
+
+HashMap intuition:
+→ Works for simple/local caching.
+
+Problems at scale:
+→ Limited memory
+→ Each server has separate cache
+→ Restart loses data
+→ Servers don't share cache
+
+
+Distributed cache:
+→ Shared fast cache across servers.
+→ Example: Redis.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔥 9. MOST IMPORTANT SYSTEM DESIGN MINDSET
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DO NOT MEMORIZE:
+
+Load Balancer
+  ↓
+Redis
+  ↓
+Database
+  ↓
+Kafka
+
+
+ASK:
+
+Where is the system struggling?
+          ↓
+Why?
+          ↓
+What removes the bottleneck?
+          ↓
+What becomes the NEXT bottleneck?
+          ↓
+What are the trade-offs?
+
+
+Bottleneck can MOVE.
+
+Server bottleneck
+  ↓
+Add servers
+  ↓
+DB bottleneck
+  ↓
+Scale / optimize DB
+  ↓
+Another bottleneck
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🟢 10. LATENCY vs THROUGHPUT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Latency
+→ Time for ONE request.
+
+Throughput
+→ Amount of work handled per unit time.
+
+Example:
+50 ms latency
+1000 requests/sec throughput
+
+
+Chat:
+→ Low latency important.
+
+Batch processing:
+→ High throughput often important.
+
+Both may matter.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🟢 11. AVAILABILITY vs RELIABILITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Availability
+→ "Can I use the system?"
+
+Reliability
+→ "Can I trust it to work correctly?"
+
+A system can be:
+→ Available but unreliable
+→ Reliable but temporarily unavailable
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🟢 12. FAULT TOLERANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+S1 ❌
+S2 ✅
+S3 ✅
+
+System can continue.
+
+Redundancy
+→ Multiple instances/copies.
+
+Failover
+→ Switch to healthy alternative.
+
+Fault Tolerance
+→ Continue operating despite failure.
+
+
+Failure
+  ↓
+Redundancy
+  ↓
+Failover
+  ↓
+Continue service
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🟢 13. SPOF
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Single Point of Failure
+→ One component whose failure breaks
+  critical functionality.
+
+Potential SPOFs:
+
+Single Load Balancer
+Single Database
+
+Question:
+→ "If this fails, does critical functionality stop?"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🟢 14. PERFORMANCE vs SCALABILITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Performance
+→ How fast / efficient is the system now?
+
+Scalability
+→ How well can it handle MORE load?
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🟢 15. CAPACITY ESTIMATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Users
+  ↓
+DAU
+  ↓
+Requests/user/day
+  ↓
+Requests/day
+  ↓
+Average RPS
+  ↓
+Peak RPS
+
+Example:
+
+10M users
+× 20% DAU
+= 2M DAU
+
+2M × 20 requests/day
+= 40M requests/day
+
+40M / 86,400
+≈ 463 RPS average
+
+Peak:
+463 × peak factor
+
+
+Do estimates approximately.
+Goal → understand scale.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🟢 16. READ / WRITE RATIO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+10,000 RPS
+  ↓
+80% Read  → 8,000
+20% Write → 2,000
+
+
+Read-heavy:
+→ Cache
+→ Read replicas
+→ Read optimization
+
+Write-heavy:
+→ Write optimization
+→ Batching / queues where appropriate
+→ Partitioning when needed
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🟢 17. STORAGE + BANDWIDTH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Storage:
+
+Users
+  ×
+Data generated/user/day
+  =
+Data/day
+
+
+Bandwidth:
+→ Data transferred per unit time.
+
+Example:
+5 TB/day
+≈ 58 MB/sec average
+
+
+Think:
+
+Requests
+  ↓
+Data generated
+  ↓
+Storage
+  ↓
+Network bandwidth
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🟢 18. MAINTAINABILITY + EXTENSIBILITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Maintainability
+→ Easy to understand, fix and modify.
+
+Extensibility
+→ Easy to ADD new features.
+
+Bad:
+
+if(card)
+else if(UPI)
+else if(PayPal)
+...
+
+More features
+→ More modification
+→ More complexity
+→ Harder maintenance
+
+
+Later solved using:
+→ SOLID
+→ Interfaces
+→ Strategy
+→ Factory
+→ Dependency Injection
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🟢 19. TRADE-OFFS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+No perfect architecture.
+
+Common trade-offs:
+
+Latency ↔ Throughput
+Cost ↔ Performance
+Consistency ↔ Availability
+Vertical ↔ Horizontal Scaling
+Simplicity ↔ Scalability
+
+Always ask:
+
+"What does THIS system require?"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🟢 20. REQUIREMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Functional
+→ WHAT does system do?
+
+Non-Functional
+→ HOW WELL does it do it?
+
+Example:
+
+Functional:
+→ Login
+→ Modify attendance
+
+Non-functional:
+→ Modification ≤ 200 ms
+
+Constraint:
+→ Support up to 10K teachers
+
+
+Architecture comes AFTER:
+Requirements + Constraints.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔵 DAY 2 — REQUEST LIFECYCLE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When user enters:
+
+https://example.com/products/123
+
+
+Browser
+  ↓
+DNS
+  ↓
+IP
+  ↓
+TCP
+  ↓
+TLS
+  ↓
+HTTPS Request
+  ↓
+Load Balancer
+  ↓
+Backend
+  ↓
+Database
+  ↓
+Backend
+  ↓
+Response
+  ↓
+Browser
+
+
+Main System Design question:
+
+At which step can it:
+→ Fail?
+→ Slow down?
+→ Become a bottleneck?
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔵 21. DNS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+example.com
+    ↓
+DNS
+    ↓
+IP address
+
+DNS
+→ Finds destination for the domain.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔵 22. TCP + TLS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TCP:
+→ Reliable delivery
+→ Ordering
+→ Retransmission
+→ Flow control
+
+System Design lesson:
+→ Networks can fail.
+
+TLS:
+→ Secure communication.
+
+HTTPS
+→ HTTP over TLS.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔵 23. HTTP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+HTTP Request contains:
+
+→ Method
+→ Path
+→ Headers
+→ Body
+
+
+GET
+→ Read
+
+POST
+→ Create / trigger operation
+
+PUT
+→ Replace
+
+PATCH
+→ Partial update
+
+DELETE
+→ Delete
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔵 24. REST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Resources:
+
+/users
+/products
+/orders
+
+Client
+  ↓
+HTTP Request
+  ↓
+API
+  ↓
+Server
+  ↓
+Response
+
+Common REST APIs:
+→ Stateless
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔵 25. AUTHENTICATION vs AUTHORIZATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Authentication
+→ WHO are you?
+
+Authorization
+→ WHAT can you do?
+
+
+Authentication
+→ Identity
+
+Authorization
+→ Permissions
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔵 26. SESSION vs JWT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SESSION ID:
+
+Login
+  ↓
+Create session
+  ↓
+Session ID
+  ↓
+Client
+
+Request
+  ↓
+Session ID
+  ↓
+Session Storage
+  ↓
+Find user/session
+  ↓
+Respond
+
+
+JWT:
+
+Login
+  ↓
+JWT
+  ↓
+Client
+
+Request
+  ↓
+JWT
+  ↓
+ANY server
+  ↓
+Verify token
+  ↓
+Identify user
+
+
+Key note:
+
+JWT
+→ Every server can independently verify token.
+
+Session ID
+→ Server needs access to session storage/state
+  to match session ID with user/session.
+
+
+JWT can enable stateless authentication.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔵 27. COOKIES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Cookie
+→ Browser storage/transport mechanism.
+
+Server
+  ↓
+Set-Cookie
+  ↓
+Browser
+  ↓
+Future requests
+  ↓
+Cookie sent
+
+
+Cookie ≠ Authentication itself.
+
+Cookie can carry:
+→ Session ID
+→ JWT
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔵 28. IDEMPOTENCY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Problem:
+
+Payment request
+  ↓
+Server processes
+  ↓
+Response lost
+  ↓
+Client retries
+  ↓
+Payment may happen twice ❌
+
+
+Solution:
+Idempotency Key
+
+
+Request
+Key = XYZ123
+  ↓
+Process
+  ↓
+Store result
+
+
+Retry:
+Same XYZ123
+  ↓
+Already processed
+  ↓
+Return ORIGINAL result
+  ↓
+Don't process again
+
+
+Important:
+
+SAME key
+→ Same logical operation
+→ No duplicate processing
+
+
+NEW key
+→ New intentional operation
+→ Process again
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔵 29. WEBSOCKET
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Normal HTTP:
+
+Client
+  ↓ Request
+Server
+  ↓ Response
+
+
+Polling:
+
+Client → "Any new message?"
+Client → "Any new message?"
+Client → "Any new message?"
+
+
+WebSocket:
+
+Client
+   ↕
+Persistent connection
+   ↕
+
+→ Two-way communication
+→ Useful for real-time systems.
+
+
+Used for:
+→ Chat
+→ Gaming
+→ Live notifications
+→ Live tracking
+→ Collaboration
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔵 30. WEBSOCKET + MULTIPLE SERVERS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+User A → Server 1
+User B → Server 3
+
+
+Server 3 receives message for User A.
+
+Problem:
+→ Server 3 doesn't automatically know
+  where User A's connection exists.
+
+
+Possible solution:
+
+User A
+  ↓
+Server 1
+  ↓
+Shared Store
+
+User A → Server 1
+
+
+Server 3
+  ↓
+Shared Store
+  ↓
+Find User A → Server 1
+  ↓
+Server 1
+  ↓
+User A
+
+
+Shared store example:
+→ Redis
+
+Reason:
+→ Multiple servers need shared connection information.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔵 31. WEBSOCKET FAILURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+User A
+  ↓
+WebSocket
+  ↓
+Server 1 ❌
+
+Connection lost.
+
+Need mechanisms such as:
+→ Reconnection
+→ Heartbeats
+→ Connection cleanup
+→ TTL / expiration
+
+
+Stale mapping:
+
+User A → Server 1
+Server 1 crashes
+      ↓
+Mapping becomes stale
+      ↓
+Cleanup / TTL / heartbeat
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧠 FINAL FLOW TO REMEMBER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Client
+  ↓
+Single Server
+  ↓
+Traffic grows
+  ↓
+Horizontal Scaling
+  ↓
+Load Balancer
+  ↓
+Multiple Servers
+  ↓
+Statelessness
+  ↓
+Database bottleneck
+  ↓
+Caching
+  ↓
+Latency / Throughput
+  ↓
+Capacity Estimation
+  ↓
+Failures / Redundancy / Failover
+  ↓
+SPOF
+  ↓
+Requirements / Trade-offs
+
+
+DAY 2 REQUEST FLOW:
+
+Browser
+  ↓
+DNS
+  ↓
+TCP
+  ↓
+TLS
+  ↓
+HTTPS
+  ↓
+Load Balancer
+  ↓
+Backend
+  ↓
+Database
+  ↓
+Response
+
+
+Then:
+
+Authentication
+→ WHO?
+
+Authorization
+→ WHAT?
+
+JWT
+→ Any server can verify.
+
+Session ID
+→ Session storage required.
+
+Idempotency
+→ Same operation ≠ duplicate operation.
+
+WebSocket
+→ Persistent two-way communication.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔥 GOLDEN RULE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DON'T MEMORIZE:
+
+LB → Redis → DB → Kafka
+
+
+ASK:
+
+WHERE IS THE SYSTEM STRUGGLING?
+        ↓
+WHY?
+        ↓
+WHAT CHANGE REMOVES THE BOTTLENECK?
+        ↓
+WHAT BECOMES THE NEXT BOTTLENECK?
+        ↓
+WHAT ARE THE TRADE-OFFS?
+
+
+This is System Design thinking.
