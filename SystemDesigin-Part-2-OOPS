@@ -1,0 +1,1013 @@
+╔══════════════════════════════════════════════════════════════╗
+║             DAY 3 — OOP + OBJECT THINKING                  ║
+║           LLD MASTER REVISION SHEET ❤️‍🔥                    ║
+╚══════════════════════════════════════════════════════════════╝
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧠 0. WHY ARE WE LEARNING OOP FOR LLD?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+OOP ≠ memorizing syntax.
+
+OOP for LLD =
+turning a REQUIREMENT into interacting OBJECTS
+with clear STATE + BEHAVIOR + RESPONSIBILITIES.
+
+
+Requirement
+    ↓
+What THINGS exist?
+    ↓
+Candidate OBJECTS
+    ↓
+What does each object KNOW?
+    ↓
+What can each object DO?
+    ↓
+What RULES does it own?
+    ↓
+RESPONSIBILITIES
+    ↓
+How do objects RELATE?
+    ↓
+Design
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔥 1. CLASS & OBJECT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CLASS
+→ Blueprint / definition.
+
+OBJECT
+→ Actual instance of a class.
+
+
+C++:
+
+class Car {
+public:
+    string brand;
+
+    void drive() {
+        cout << "Driving";
+    }
+};
+
+Car car1;
+Car car2;
+
+
+Think:
+
+             CLASS
+               ↓
+        ┌──────────────┐
+        │     Car      │
+        │ brand        │
+        │ drive()      │
+        └──────┬───────┘
+               ↓
+        ┌──────┴──────┐
+        ↓             ↓
+      car1           car2
+     OBJECT         OBJECT
+
+
+LLD:
+Class → meaningful entity / responsibility.
+Object → actual instance participating in the system.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 2. OBJECT → RESPONSIBILITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+THE MOST IMPORTANT LLD THINKING SKILL.
+
+
+                OBJECT
+                  ↓
+        ┌─────────┼─────────┐
+        ↓         ↓         ↓
+      KNOWS     DOES      RULES
+        ↓         ↓         ↓
+      STATE     ACTIONS   VALIDITY
+        └─────────┼─────────┘
+                  ↓
+           RESPONSIBILITY
+
+
+Example:
+
+Order
+
+KNOWS:
+→ orderId
+→ customerId
+→ items
+→ status
+
+DOES:
+→ change status
+→ cancel
+→ complete
+
+RESPONSIBLE FOR:
+→ maintaining valid order lifecycle
+
+
+🔥 When blank:
+
+"Which object naturally has the information
+required to perform this responsibility?"
+
+
+IMPORTANT:
+
+Responsibility ≠ simply a method.
+
+BAD:
+→ "Order has calculateTotal() because Order classes
+   usually have calculateTotal()."
+
+GOOD:
+→ "Order owns its items/prices, therefore it naturally
+   owns the responsibility of calculating its total."
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔒 3. ENCAPSULATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CORE IDEA:
+
+Protect internal state and let the object control
+how that state changes.
+
+
+Object
+  ↓
+Owns state
+  ↓
+Controls access
+  ↓
+Enforces rules
+
+
+C++:
+
+class BankAccount {
+private:
+    double balance = 0;
+
+public:
+    void deposit(double amount) {
+        if (amount > 0)
+            balance += amount;
+    }
+
+    double getBalance() const {
+        return balance;
+    }
+};
+
+
+❌ Don't think:
+"Encapsulation = private + getters/setters"
+
+✅ Think:
+"Keep the object's state under its own control."
+
+
+LLD CONNECTION:
+
+Object owns responsibility
+        ↓
+Object protects required state
+        ↓
+Object enforces its rules
+
+
+🧠 ONE LINE:
+Encapsulation → Protect the inside + control how it changes.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧠 4. ABSTRACTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CORE IDEA:
+
+Hide unnecessary implementation complexity.
+Expose only what the outside world needs.
+
+
+Complex implementation
+        ↓
+       HIDE
+        ↓
+Expose necessary behavior
+
+
+Example:
+
+Payment
+   ↓
+ pay()
+
+
+Caller doesn't need to know:
+
+→ validation
+→ provider communication
+→ transaction processing
+→ response handling
+
+
+C++ EXAMPLE:
+
+class Payment {
+public:
+    void pay() {
+        validate();
+        process();
+        sendReceipt();
+    }
+
+private:
+    void validate() {
+        // ...
+    }
+
+    void process() {
+        // ...
+    }
+
+    void sendReceipt() {
+        // ...
+    }
+};
+
+
+🧠 Difference:
+
+Encapsulation
+→ "How do I protect the inside?"
+
+Abstraction
+→ "What should the outside world see?"
+
+
+🧠 ONE LINE:
+Abstraction → Hide unnecessary complexity; expose essentials.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🌳 5. INHERITANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CORE IDEA:
+
+Specialized class extends a general class.
+
+
+Vehicle
+   ↑
+   │
+  Car
+
+
+C++:
+
+class Vehicle {
+public:
+    void start() {
+        cout << "Starting";
+    }
+};
+
+class Car : public Vehicle {
+public:
+    void openTrunk() {
+        cout << "Trunk opened";
+    }
+};
+
+
+Relationship:
+
+Car IS-A Vehicle
+
+
+Use when:
+→ Genuine IS-A
+→ Child is a valid specialization
+→ Parent is a meaningful abstraction
+
+
+❌ Don't use inheritance only for code reuse.
+
+
+🧠 ONE LINE:
+Inheritance → IS-A → specialization.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔥 6. POLYMORPHISM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CORE IDEA:
+
+Same contract/interface
+        ↓
+Different implementations
+        ↓
+Different behavior
+
+
+             Payment
+                │
+        ┌───────┼───────┐
+        ↓       ↓       ↓
+       UPI     Card   Wallet
+        │       │       │
+       pay()   pay()   pay()
+
+
+C++ common form:
+
+class Payment {
+public:
+    virtual void pay() = 0;
+    virtual ~Payment() = default;
+};
+
+class UPI : public Payment {
+public:
+    void pay() override {
+        cout << "UPI payment";
+    }
+};
+
+
+Conceptually:
+
+Payment* payment = new UPI();
+payment->pay();
+
+
+→ Common contract
+→ Runtime behavior comes from actual object
+
+
+❌ Don't reduce polymorphism to:
+"Parent pointer → child object"
+
+✅ Real idea:
+Different implementations can be used through
+a common contract.
+
+
+🧠 ONE LINE:
+Polymorphism → Same contract, different behavior.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔗 7. ASSOCIATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CORE IDEA:
+
+Two objects/classes have a meaningful relationship
+or interaction.
+
+Example:
+
+Doctor ───── Patient
+
+
+No ownership required.
+No lifecycle dependency required.
+
+
+C++ CONCEPT:
+
+class Doctor {
+private:
+    Patient* patient;
+};
+
+
+Think:
+
+"A is related to / interacts with B."
+
+
+🧠 ONE LINE:
+Association → RELATED TO / INTERACTS WITH.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧩 8. AGGREGATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CORE IDEA:
+
+A has/groups B,
+but B can exist independently.
+
+
+Example:
+
+Team ◇──── Player
+
+Team
+ ├── Player
+ ├── Player
+ └── Player
+
+
+Team destroyed
+      ↓
+Players can still exist
+
+
+C++ CONCEPT:
+
+class Team {
+private:
+    vector<Player*> players;
+};
+
+
+Think:
+
+Association
+→ "They are related."
+
+Aggregation
+→ "One has/groups the other,
+   but the other can live independently."
+
+
+🧠 ONE LINE:
+Aggregation → HAS-A / GROUPS + independent lifecycle.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💥 9. COMPOSITION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CORE IDEA:
+
+Strong HAS-A / OWNS-A relationship.
+
+Contained object's lifecycle is tied to the owner.
+
+
+Example:
+
+House
+  ◆──── Room
+
+
+House
+ ├── Room
+ ├── Room
+ └── Room
+
+
+House disappears
+      ↓
+Its Rooms don't meaningfully exist
+as independent parts of that House.
+
+
+C++ CONCEPT:
+
+class House {
+private:
+    Room room1;
+    Room room2;
+};
+
+
+Think:
+
+Aggregation
+→ HAS-A + independent lifecycle
+
+Composition
+→ OWNS-A + tied lifecycle
+
+
+🧠 ONE LINE:
+Composition → Strong HAS-A + ownership/lifecycle dependency.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚡ 10. DEPENDENCY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CORE IDEA:
+
+A temporarily needs/uses B to perform some work.
+
+
+A ───── uses ─────→ B
+
+
+Example:
+
+ReportGenerator
+       │
+       ↓
+    Printer
+
+
+C++ CONCEPT:
+
+class ReportGenerator {
+public:
+    void generate(Printer& printer);
+};
+
+
+Printer is not necessarily owned.
+It is simply needed for the operation.
+
+
+🧠 ONE LINE:
+Dependency → TEMPORARILY USES / RELIES ON.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔌 11. INTERFACE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CORE IDEA:
+
+INTERFACE = CONTRACT
+
+"What must an implementation provide?"
+
+
+Payment
+   ↓
+ pay()
+   ↓
+┌──────┼──────┐
+↓      ↓      ↓
+UPI   Card   Wallet
+
+
+C++ has no separate "interface" keyword.
+
+Common C++ representation:
+
+class Payment {
+public:
+    virtual void pay() = 0;
+    virtual ~Payment() = default;
+};
+
+
+Pure virtual function:
+
+virtual void pay() = 0;
+
+
+→ Derived classes must implement it.
+
+
+Think:
+
+INTERFACE
+    ↓
+Defines WHAT
+    ↓
+Not HOW
+
+
+🧠 ONE LINE:
+Interface → Contract defining required behavior.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧱 12. ABSTRACT CLASS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CORE IDEA:
+
+Common base that can contain:
+
+→ Shared state
+→ Shared implementation
+→ Required behavior for subclasses
+
+
+Vehicle (abstract)
+       │
+   ┌───┴───┐
+   ↓       ↓
+  Car     Bike
+
+
+C++:
+
+class Vehicle {
+public:
+    virtual void move() = 0;   // pure virtual
+
+    void start() {
+        cout << "Starting";
+    }
+
+    virtual ~Vehicle() = default;
+};
+
+
+Vehicle v;      // ❌ cannot instantiate
+Car c;         // ✅
+
+
+THINK:
+
+Interface
+→ "What can you DO?"
+
+Abstract Class
+→ "What ARE you,
+   and what do you have in common?"
+
+
+🧠 ONE LINE:
+Abstract Class → Common base + shared state/behavior +
+some behavior left to subclasses.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔌 13. INTERFACE vs ABSTRACT CLASS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+INTERFACE
+→ Contract
+→ Capability
+→ WHAT must be provided
+→ Mainly defines required behavior
+
+ABSTRACT CLASS
+→ Common base
+→ Shared state/behavior possible
+→ WHAT is common + WHAT must vary
+
+
+Mental flow:
+
+Abstraction
+    ↓
+"What should the outside world see?"
+
+Interface
+    ↓
+"What contract should implementations follow?"
+
+Polymorphism
+    ↓
+"Different implementations can behave differently
+through that common contract."
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚔️ 14. COMPOSITION vs INHERITANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Inheritance
+→ IS-A
+
+Composition
+→ HAS-A
+
+
+Car IS-A Vehicle
+        ↓
+   Inheritance
+
+
+Car HAS-A Engine
+        ↓
+   Composition
+
+
+Inheritance:
+
+Vehicle
+   ↑
+  Car
+
+
+Composition:
+
+Car
+ │
+ └── Engine
+
+
+🔥 IMPORTANT:
+
+Don't use inheritance primarily for code reuse.
+
+Use inheritance for:
+→ Genuine IS-A
+→ Meaningful specialization
+→ Substitutability makes sense
+
+
+Use composition when:
+→ Object is built from components
+→ Behavior needs flexibility
+→ Components should be replaceable
+
+
+🧠 ONE LINE:
+
+Inheritance → IS-A → specialization
+
+Composition → HAS-A → assembling/owning components
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔗 15. RELATIONSHIP CHEAT SHEET
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Association
+→ Related to / interacts with
+
+Aggregation
+→ HAS-A / groups
+→ Child can exist independently
+
+Composition
+→ Strong HAS-A / owns
+→ Lifecycle tied
+
+Dependency
+→ Temporarily uses
+
+
+MECHANICAL VIEW:
+
+Association
+    ↓
+"They are related."
+
+Aggregation
+    ↓
+"One has/groups the other,
+but both can live independently."
+
+Composition
+    ↓
+"One strongly owns the other;
+lifecycle is tied."
+
+Dependency
+    ↓
+"One temporarily needs the other."
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧠 16. THE COMPLETE OBJECT-THINKING MACHINE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+                REQUIREMENT
+                     ↓
+            What THINGS exist?
+                     ↓
+                  OBJECTS
+                     ↓
+          ┌──────────┴──────────┐
+          ↓                     ↓
+       What it KNOWS         What it DOES
+          ↓                     ↓
+        STATE                BEHAVIOR
+          └──────────┬──────────┘
+                     ↓
+              What RULES?
+                     ↓
+              RESPONSIBILITY
+                     ↓
+        Who naturally owns it?
+                     ↓
+              RELATIONSHIPS
+                     ↓
+    Association / Aggregation /
+    Composition / Dependency
+                     ↓
+           Need abstraction?
+                     ↓
+                Interface
+                     ↓
+       Need common base/shared logic?
+                     ↓
+             Abstract Class
+                     ↓
+       Different implementations?
+                     ↓
+             Polymorphism
+                     ↓
+       Genuine IS-A relationship?
+                     ↓
+              Inheritance
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+👀 17. WHEN YOU GO BLANK ABOUT RESPONSIBILITIES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+OBJECT
+   ↓
+What does it KNOW?
+   ↓
+What can it DO?
+   ↓
+What RULES must remain valid?
+   ↓
+What does it OWN?
+   ↓
+What responsibility naturally follows?
+
+
+Ask:
+
+"Which object has the information needed
+to perform this responsibility?"
+
+
+Examples of responsibility types:
+
+→ Create
+→ Validate
+→ Calculate
+→ Maintain state
+→ Change state
+→ Enforce rules
+→ Find / retrieve
+→ Coordinate
+→ Perform an operation
+
+
+⚠️ These are thinking triggers,
+not a list to blindly assign to every class.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+❤️‍🔥 18. CLASS IN 2 LINES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CLASS
+→ Represents a meaningful entity/responsibility.
+
+CLASS contains:
+→ STATE it owns
+→ BEHAVIOR it is responsible for
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚀 19. FINAL LLD MINDSET
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Don't think:
+
+"Which classes should I write?"
+
+Think:
+
+"What things exist?"
+        ↓
+"What does each one know?"
+        ↓
+"What does each one do?"
+        ↓
+"What rules does each one own?"
+        ↓
+"Which object naturally owns this responsibility?"
+        ↓
+"How are they related?"
+        ↓
+"Do I need abstraction?"
+        ↓
+"Do I need a common contract?"
+        ↓
+"Do different implementations behave differently?"
+        ↓
+"Is there a genuine IS-A relationship?"
+        ↓
+"Should I use inheritance or composition?"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔥 20. DAY 3 — ONE-GLANCE RECALL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CLASS
+ ↓
+OBJECT
+ ↓
+KNOWS + DOES + RULES
+ ↓
+RESPONSIBILITY
+ ↓
+ENCAPSULATION
+ ↓
+ABSTRACTION
+ ↓
+RELATIONSHIPS
+ ├── Association
+ ├── Aggregation
+ ├── Composition
+ └── Dependency
+ ↓
+INTERFACE
+ ↓
+ABSTRACT CLASS
+ ↓
+POLYMORPHISM
+ ↓
+INHERITANCE
+ ↓
+COMPOSITION vs INHERITANCE
+ ↓
+OBJECT-THINKING FRAMEWORK
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧠 21. ABSOLUTE CORE — REMEMBER THESE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Class
+→ Blueprint
+
+Object
+→ Instance
+
+Responsibility
+→ What an object naturally owns/does/enforces
+
+Encapsulation
+→ Protect the inside
+
+Abstraction
+→ Simplify the outside
+
+Inheritance
+→ IS-A
+
+Composition
+→ HAS-A / OWNS-A
+
+Association
+→ RELATED TO
+
+Aggregation
+→ HAS/GROUPS + independent lifecycle
+
+Dependency
+→ TEMPORARILY USES
+
+Interface
+→ CONTRACT
+
+Abstract Class
+→ COMMON BASE
+
+Polymorphism
+→ SAME CONTRACT + DIFFERENT BEHAVIOR
+
+
+❤️‍🔥 FINAL RULE:
+
+REQUIREMENT
+    ↓
+OBJECTS
+    ↓
+STATE
+    ↓
+BEHAVIOR
+    ↓
+RULES
+    ↓
+RESPONSIBILITIES
+    ↓
+RELATIONSHIPS
+    ↓
+ABSTRACTION / INTERFACES
+    ↓
+POLYMORPHISM
+    ↓
+COMPOSITION OR INHERITANCE
+    ↓
+LLD
